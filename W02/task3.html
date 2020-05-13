@@ -1,0 +1,59 @@
+<html>
+<head>
+<title>W02: task 3</title>
+</head>
+<body>
+  <form name = "v0">
+    <label for="textForm">v0: </label>
+  <input type = "number" id = "v0x"/>
+  <input type = "number" id = "v0y"/>
+  <input type = "number" id = "v0z"/>
+</form>
+<form name = "v1">
+  <label for="textForm">v1: </label>
+  <input type = "number" id = "v1x"/>
+  <input type = "number" id = "v1y"/>
+  <input type = "number" id = "v1z"/>
+  </form>
+  <form name = "v2">
+    <label for="textForm">v2: </label>
+  <input type = "number" id = "v2x"/>
+  <input type = "number" id = "v2y"/>
+  <input type = "number" id = "v2z"/>
+  </form>
+  <input type="button"
+onclick="e()"
+value="Caliculate"/>
+<script src="vec3.js"></script>
+<script>
+
+  function AreaOfTriangle(v0, v1, v2)
+  {
+    var a = new Vec3(v1.x - v0.x, v1.y - v0.y, v1.z - v0.z);
+    var b = new Vec3(v2.x - v0.x, v2.y - v0.y, v2.z - v0.z);
+    var S = 0.5 * Math.sqrt(Math.pow(a.y * b.z - a.z * b.y, 2)+Math.pow(a.z * b.x - a.x * b.z,2)+Math.pow(a.x * b.y - a.y * b.x,2));
+    return S;
+  }
+  function e() {
+    var x0 = document.getElementById("v0x").value;
+    var y0 = document.getElementById("v0y").value;
+    var z0 = document.getElementById("v0z").value;
+    var x1 = document.getElementById("v1x").value;
+    var y1 = document.getElementById("v1y").value;
+    var z1 = document.getElementById("v1z").value;
+    var x2 = document.getElementById("v2x").value;
+    var y2 = document.getElementById("v2y").value;
+    var z2 = document.getElementById("v2z").value;
+
+    var v0 = new Vec3( x0, y0, z0 );
+    var v1 = new Vec3( x1, y1, z1 );
+    var v2 = new Vec3( x2, y2, z2 );
+
+    var S = AreaOfTriangle(v0, v1, v2);
+    document.write("caliculate result : " + S);
+   }
+  // var S = AreaOfTriangle(v0, v1, v2);
+  // document.write(S);
+</script>
+</body>
+</html>
