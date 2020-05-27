@@ -1,10 +1,9 @@
 <html>
     <head>
-	<title>W06: task 02</title>
+	<title>W05: task 02</title>
     </head>
     <body>
 	<script src="https://threejs.org/build/three.min.js"></script>
-  gouraud shading_lambertian reflection
 	<script type="x-shader/x-vertex" id="gouraud.vert">
   varying vec3 point_color;
   varying vec4 point_position;
@@ -45,16 +44,17 @@
 	<script>
 	 main();
 	</script>
+  <p>gouraud shading_lambertian reflection</p>
     </body>
     <body>
 	<script src="https://threejs.org/build/three.min.js"></script>
-  gouraud shading_phong reflection
 	<script type="x-shader/x-vertex" id="gouraud2.vert">
   varying vec3 point_color;
   varying vec4 point_position;
   varying vec3 normal_vector;
   uniform vec3 light_position;
   uniform vec3 camera_position;
+
   vec3 PhongReflection( vec3 C, vec3 L, vec3 N, vec3 V )
   {
    float ka = 0.3;
@@ -95,22 +95,22 @@
 	<script>
 	 main2();
 	</script>
+  <p>gouraud shading_phong reflection</p>
     </body>
+
     <body>
 	<script src="https://threejs.org/build/three.min.js"></script>
-
-  phong shading_lambertian reflection
   <script type="x-shader/x-vertex" id="phong.vert">
   varying vec3 point_color;
   varying vec4 point_position;
   varying vec3 normal_vector;
-  uniform vec3 light_position;
 
   void main()
   {
   point_color = color;
   point_position = modelViewMatrix * vec4( position, 1.0 );
   normal_vector = normalMatrix * normal;
+
   gl_Position = projectionMatrix * point_position;
   }
   </script>
@@ -120,6 +120,7 @@
   varying vec4 point_position;
   varying vec3 normal_vector;
   uniform vec3 light_position;
+
   vec3 LambertianReflection(vec3 C, vec3 L, vec3 N)
 	{
 	float ka = 0.4;
@@ -144,23 +145,22 @@
 	<script>
 	 main();
 	</script>
+  <p>phong shading_lambertian reflection</p>
     </body>
 
     <body>
 	<script src="https://threejs.org/build/three.min.js"></script>
-  phong shading_phong reflection
   <script type="x-shader/x-vertex" id="phong2.vert">
   varying vec3 point_color;
   varying vec4 point_position;
   varying vec3 normal_vector;
-  uniform vec3 light_position;
-  uniform vec3 camera_position;
 
   void main()
   {
   point_color = color;
   point_position = modelViewMatrix * vec4( position, 1.0 );
   normal_vector = normalMatrix * normal;
+
   gl_Position = projectionMatrix * point_position;
   }
   </script>
@@ -171,6 +171,7 @@
   varying vec3 normal_vector;
   uniform vec3 light_position;
   uniform vec3 camera_position;
+
   vec3 PhongReflection( vec3 C, vec3 L, vec3 N ,vec3 V)
   {
   float ka = 0.3;
@@ -201,5 +202,6 @@
 	<script>
 	 main2();
 	</script>
+  <p>phong shading_phong reflection</p>
     </body>
 </html>
