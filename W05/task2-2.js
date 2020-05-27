@@ -1,4 +1,4 @@
-function main()
+function main2()
 {
     var width = 500;
     var height = 500;
@@ -24,8 +24,8 @@ function main()
     var geometry = new THREE.TorusKnotGeometry( 1, 0.3, 100, 20 );
     var material = new THREE.ShaderMaterial({
         vertexColors: THREE.VertexColors,
-        vertexShader: document.getElementById('phong.vert').text,
-        fragmentShader: document.getElementById('phong.frag').text,
+        vertexShader: document.getElementById('phong2.vert').text,
+        fragmentShader: document.getElementById('phong2.frag').text,
         uniforms: {
         light_position: { type: 'v3', value: light.position }
         }
