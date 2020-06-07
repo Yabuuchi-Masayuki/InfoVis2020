@@ -1,4 +1,4 @@
-function Isosurfaces( volume, isovalue )
+function Isosurfaces3( volume, isovalue )
 {
 
   // Create color map
