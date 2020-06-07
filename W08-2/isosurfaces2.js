@@ -1,4 +1,4 @@
-function Isosurfaces2( volume, isovalue )
+function Isosurfaces( volume, isovalue )
 {
     var geometry = new THREE.Geometry();
     var material = new THREE.MeshLambertMaterial();
@@ -120,21 +120,19 @@ function Isosurfaces2( volume, isovalue )
         return index;
     }
 
-
     function interpolated_vertex( v0, v1, s )
     {
       var lines = volume.resolution.x;
       var slices = volume.resolution.x * volume.resolution.y
 
       var i0 = v0.x + v0.y * lines + v0.z * slices;
-    	var i1 = v1.x + v1.y * lines + v1.z * slices;
+      var i1 = v1.x + v1.y * lines + v1.z * slices;
 
-    	var s0 = volume.values[ i0 ][ 0 ];
-    	var s1 = volume.values[ i1 ][ 0 ];
+      var s0 = volume.values[ i0 ][ 0 ];
+      var s1 = volume.values[ i1 ][ 0 ];
 
-    	var t = ( s - s0 ) / ( s1 - s0 );
+      var t = ( s - s0 ) / ( s1 - s0 );
 
-    	return new THREE.Vector3().addVectors(v0.multiplyScalar( 1 - t ),v1.multiplyScalar( t ));
-
+      return new THREE.Vector3().addVectors(v0.multiplyScalar( 1 - t ),v1.multiplyScalar( t ));
     }
 }
