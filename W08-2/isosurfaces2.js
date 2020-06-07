@@ -8,22 +8,8 @@ function Isosurfaces( volume, isovalue )
     isovalue = KVS.Clamp( isovalue, smin, smax );
 
     var lut = new KVS.MarchingCubesTable();
-
-    // Create color map
-    var cmap = [];
-    for ( var i = 0; i < 256; i++ )
-    {
-        var S = i / 255.0; // [0,1]
-        var R = Math.max( Math.cos( ( S - 1.0 ) * Math.PI ), 0.0 );
-        var G = Math.max( Math.cos( ( S - 0.5 ) * Math.PI ), 0.0 );
-        var B = Math.max( Math.cos( S * Math.PI ), 0.0 );
-        var color = new THREE.Color( R, G, B );
-        cmap.push( [ S, '0x' + color.getHexString() ] );
-    }
-
     var cell_index = 0;
     var counter = 0;
-    var zarigani = 0;
     for ( var z = 0; z < volume.resolution.z - 1; z++ )
     {
         for ( var y = 0; y < volume.resolution.y - 1; y++ )
@@ -55,75 +41,9 @@ function Isosurfaces( volume, isovalue )
                     var v4 = new THREE.Vector3( x + vid4[0], y + vid4[1], z + vid4[2] );
                     var v5 = new THREE.Vector3( x + vid5[0], y + vid5[1], z + vid5[2] );
 
-		    var eid = [eid0, eid1, eid2];
-		    var idc = [0, 0, 0, 0, 0, 0];
-		    var k = 0;
-
-		    for(l=0;l<3;l++){
-
-			switch (eid[l]){
-			case 0:
-			    idc[k] = 0;
-			    idc[k+1] = 1;
-			    break;
-			case 1:
-			    idc[k] = 1;
-			    idc[k+1] = 2;
-			    break;
-			case 2:
-			    idc[k] = 2;
-			    idc[k+1] = 3;
-			    break;
-			case 3:
-			    idc[k] = 3;
-			    idc[k+1] = 0;
-			    break;
-			case 4:
-			    idc[k] = 4;
-			    idc[k+1] = 5;
-			    break;
-			case 5:
-			    idc[k] = 5;
-			    idc[k+1] = 6;
-			    break;
-			case 6:
-			    idc[k] = 6;
-			    idc[k+1] = 7;
-			    break;
-			case 7:
-			    idc[k] = 7;
-			    idc[k+1] = 4;
-			    break;
-			case 8:
-			    idc[k] = 0;
-			    idc[k+1] = 4;
-			    break;
-			case 9:
-			    idc[k] = 1;
-			    idc[k+1] = 5;
-			    break;
-			case 10:
-			    idc[k] = 2;
-			    idc[k+1] = 6;
-			    break;
-			case 11:
-			    idc[k] = 3;
-			    idc[k+1] = 7;
-			    break;
-			}
-			k = k+2;
-		    }
-
-		    var s0 = volume.values[ indices[ idc[0] ] ][0];
-		    var s1 = volume.values[ indices[ idc[1] ] ][0];
-		    var s2 = volume.values[ indices[ idc[2] ] ][0];
-		    var s3 = volume.values[ indices[ idc[3] ] ][0];
-		    var s4 = volume.values[ indices[ idc[4] ] ][0];
-		    var s5 = volume.values[ indices[ idc[5] ] ][0];
-
-                    var v01 = interpolated_vertex( v0, v1, isovalue, s0, s1 );
-                    var v23 = interpolated_vertex( v2, v3, isovalue, s2, s3 );
-                    var v45 = interpolated_vertex( v4, v5, isovalue, s4, s5 );
+                    var v01 = interpolated_vertex( v0, v1, isovalue );
+                    var v23 = interpolated_vertex( v2, v3, isovalue );
+                    var v45 = interpolated_vertex( v4, v5, isovalue );
 
                     geometry.vertices.push( v01 );
                     geometry.vertices.push( v23 );
@@ -133,12 +53,6 @@ function Isosurfaces( volume, isovalue )
                     var id1 = counter++;
                     var id2 = counter++;
                     geometry.faces.push( new THREE.Face3( id0, id1, id2 ) );
-
-		     // Assign colors for each vertex
-		    material.vertexColors = THREE.FaceColors;
-		    var C = new THREE.Color().setHex( cmap[ index ][1] );
-		    geometry.faces[zarigani].color = C;
-		    zarigani++;
                 }
             }
             cell_index++;
@@ -147,6 +61,20 @@ function Isosurfaces( volume, isovalue )
     }
 
     geometry.computeVertexNormals();
+
+    // Create color map
+    var cmap = [];
+    for ( var i = 0; i < 256; i++ )
+    {
+        var S = i / 255.0; // [0,1]
+        var R = Math.max( Math.cos( ( S - 1.0 ) * Math.PI ), 0.0 );
+        var G = Math.max( Math.cos( ( S - 0.5 ) * Math.PI ), 0.0 );
+        var B = Math.max( Math.cos( S * Math.PI ), 0.0 );
+        var color = new THREE.Color( R, G, B );
+        cmap.push( [ S, '0x' + color.getHexString() ] );
+    }
+
+    material.color = new THREE.Color().setHex( cmap[ isovalue ][1] );
 
     return new THREE.Mesh( geometry, material );
 
@@ -192,11 +120,19 @@ function Isosurfaces( volume, isovalue )
         return index;
     }
 
-    function interpolated_vertex( v0, v1, s, s0, s1)
+    function interpolated_vertex( v0, v1, s )
     {
-	var ax = ((s - s0)*v1.x + (s1 - s)*v0.x) / (s1 - s0);
-	var ay = ((s - s0)*v1.y + (s1 - s)*v0.y) / (s1 - s0);
-	var az = ((s - s0)*v1.z + (s1 - s)*v0.z) / (s1 - s0);
-	return new THREE.Vector3(ax,ay,az);
+      var lines = volume.resolution.x;
+      var slices = volume.resolution.x * volume.resolution.y
+
+      var i0 = v0.x + v0.y * lines + v0.z * slices;
+      var i1 = v1.x + v1.y * lines + v1.z * slices;
+
+      var s0 = volume.values[ i0 ][ 0 ];
+      var s1 = volume.values[ i1 ][ 0 ];
+
+      var t = ( s - s0 ) / ( s1 - s0 );
+
+      return new THREE.Vector3().addVectors(v0.multiplyScalar( 1 - t ),v1.multiplyScalar( t ));
     }
 }
