@@ -1,0 +1,477 @@
+<html>
+    <head>
+      <meta http-equiv="content-type" charset="utf-8">
+	     <title>Final Task</title>
+       <div style="text-align:center"><font size="7">情報可視化論　Final Task</font><br>
+       <font size="7">201x027x 薮内雅幸</font><br>
+       </div>
+       <div align="left">
+       <br>
+       <font size="6">Overview</font><br>
+       <font size="5">
+        今回の課題では以下のユーザインターフェースを実装した。
+       <ol>
+       <li>isovalueの変更</li>
+       isovalueを値をバーを用いてユーザが設定できるようにした。初期値は128とした。
+       <li>Shading・Reflectionの変更</li>
+       2種類のshadingと4種類のReflectionを作成し、それぞれボタンを用いて変更できるようにした。
+       <li>color mapの変更</li>
+       ボタンを用いてRainbow color map と White-Green color map を変更できるようにした。
+       </font>
+        <br>
+        <br>
+        </ol>
+
+       </div>
+    </head>
+    <font size="6">Visualization Result</font><br>
+    <body style="margin:0">
+      <script src="three.min.js"></script>
+      <script src="TrackballControls.js"></script>
+      <script src="https://threejs.org/examples/js/math/Lut.js"></script>
+      <script src="https://naohisas.github.io/KVS.js/Build/KVS.min.js"></script>
+      <script src="https://naohisas.github.io/KVS.js/Build/KVS2THREE.min.js"></script>
+      <script src="https://naohisas.github.io/KVS.js/Source/KVSLobsterData.js"></script>
+      <script src="Bounds.js"></script>
+      <script src="Isosurfaces.js"></script>
+      <script src="Finaltask.js"></script>
+      <div id="display" style="width: 80%; float: left;"></div>
+      <div id="controller" style="width:20%; float:left;">
+      <label id="label" style="font-family:Arial;"></label>
+      <div><b><font color="red" size="4">change color</font></b></div>
+      <input id="range" type="range" min="0" max="254" step="1" value="128"/> <span id="value">128</span><br>
+      <input type="button" id="btn1"  value="Phong Shading-PhongReflection" onclick="btn1Click()" /><br>
+      <input type="button" id="btn2"  value="Gouraud Shading-PhongReflection" onclick="btn2Click()" /><br>
+      <input type="button" id="btn3"  value="Phong Shading-LambertianReflection" onclick="btn3Click()" /><br>
+      <input type="button" id="btn4"  value="Gouraud Shading-LambertianReflection" onclick="btn4Click()" /><br>
+      <input type="button" id="btn5"  value="Phong Shading-BlinnPhongReflection" onclick="btn5Click()" /><br>
+      <input type="button" id="btn6"  value="Gouraud Shading-BlinnPhongReflection" onclick="btn6Click()" /><br>
+      <input type="button" id="btn7"  value="Phong Shading-CookTorranceReflection" onclick="btn7Click()" /><br>
+      <input type="button" id="btn8"  value="Gouraud Shading-CookTorranceReflection" onclick="btn8Click()" /><br>
+      <input type="button" id="btn9"  value="Rainbow color map" onclick="btn9Click()" /><br>
+      <input type="button" id="btn10"  value="White-Green color map" onclick="btn10Click()" /><br>
+
+      <script>
+      var elem = document.getElementById('range');
+      var target = document.getElementById('value');
+      var rangeValue = function (elem, target) {
+        return function(evt){
+          target.innerHTML = elem.value;
+        }
+      }
+      elem.addEventListener('input', rangeValue(elem, target));
+      </script>
+    <!-- PhongShading -->
+
+      <script type="x-shader/x-vertex" id="phong1.vert">
+      varying vec3 point_color;
+      varying vec4 point_position;
+      varying vec3 normal_vector;
+
+      void main()
+      {
+      point_color = color;
+      point_position = modelViewMatrix * vec4( position, 1.0 );
+      normal_vector = normalMatrix * normal;
+      gl_Position = projectionMatrix * point_position;
+      }
+      </script>
+
+      <script type="x-shader/x-fragment" id="phong1.frag">
+      varying vec3 point_color;
+      varying vec4 point_position;
+      varying vec3 normal_vector;
+      uniform vec3 light_position;
+      uniform vec3 camera_position;
+      uniform vec3 mcolor;
+      vec3 PhongReflection( vec3 C, vec3 L, vec3 N ,vec3 V)
+      {
+      float ka = 0.3;
+      float kd = 0.5;
+      float ks = 0.8;
+      float n = 50.0;
+      vec3 R = reflect( -L, N );
+      float dd = max( dot( N, L ), 0.0 );
+      float ds = pow( max( dot( R, V ), 0.0 ), n );
+      if ( dd <= 0.0 ) { ds = 0.0; }
+      float Ia = ka;
+      float Id = kd * dd;
+      float Is = ks * ds;
+      return C * ( Ia + Id + Is );
+      }
+      void main()
+      {
+      vec3 C = mcolor;
+      vec3 L = normalize( light_position - point_position.xyz );
+      vec3 N = normalize( normal_vector );
+      vec3 V = normalize( camera_position - point_position.xyz);
+      vec3 shaded_color = PhongReflection( C, L, N ,V);
+      gl_FragColor = vec4( shaded_color, 1.0 );
+      }
+      </script>
+      <script type="x-shader/x-vertex" id="phong2.vert">
+      varying vec3 point_color;
+      varying vec4 point_position;
+      varying vec3 normal_vector;
+
+      void main()
+      {
+      point_color = color;
+      point_position = modelViewMatrix * vec4( position, 1.0 );
+      normal_vector = normalMatrix * normal;
+      gl_Position = projectionMatrix * point_position;
+      }
+      </script>
+
+      <script type="x-shader/x-fragment" id="phong2.frag">
+      varying vec3 point_color;
+      varying vec4 point_position;
+      varying vec3 normal_vector;
+      uniform vec3 light_position;
+      uniform vec3 mcolor;
+      vec3 LambertianReflection( vec3 C, vec3 L, vec3 N )
+      {
+      float ka = 0.4;
+      float kd = 0.6;
+      float dd = max( dot( N, L ), 0.0 );
+      float Ia = ka;
+      float Id = kd * dd;
+      return C * ( Ia + Id );
+      }
+      void main()
+      {
+      vec3 C = mcolor;
+      vec3 L = normalize( light_position - point_position.xyz );
+      vec3 N = normalize( normal_vector );
+      vec3 shaded_color = LambertianReflection( C, L, N );
+      gl_FragColor = vec4( shaded_color, 1.0 );
+      }
+      </script>
+      <script type="x-shader/x-vertex" id="phong3.vert">
+      varying vec3 point_color;
+      varying vec4 point_position;
+      varying vec3 normal_vector;
+
+      void main()
+      {
+      point_color = color;
+      point_position = modelViewMatrix * vec4( position, 1.0 );
+      normal_vector = normalMatrix * normal;
+      gl_Position = projectionMatrix * point_position;
+      }
+      </script>
+
+      <script type="x-shader/x-fragment" id="phong3.frag">
+      varying vec3 point_color;
+      varying vec4 point_position;
+      varying vec3 normal_vector;
+      uniform vec3 light_position;
+      uniform vec3 camera_position;
+      uniform vec3 mcolor;
+       vec3 BlinnPhongReflection( vec3 C, vec3 L, vec3 N, vec3 V )
+       {
+           float ka = 0.3;
+           float kd = 0.5;
+           float ks = 0.8;
+           float n = 50.0;
+
+           vec3 H = normalize( L + V );
+           float dd = dot( N, L );
+           float ds = 0.0;
+           if ( dd > 0.0 )
+           {
+         ds = pow( dot( H, N ), n );
+           }
+
+           float Ia = ka;
+           float Id = kd * dd;
+           float Is = ks * ds;
+           return C * ( Ia + Id + Is );
+       }
+       void main()
+       {
+       vec3 C = mcolor;
+       vec3 L = normalize( light_position - point_position.xyz );
+       vec3 N = normalize( normal_vector );
+       vec3 V = normalize( camera_position - point_position.xyz);
+       vec3 shaded_color = BlinnPhongReflection( C, L, N, V );
+       gl_FragColor = vec4( shaded_color, 1.0 );
+       }
+      </script>
+      <script type="x-shader/x-vertex" id="phong4.vert">
+      varying vec3 point_color;
+      varying vec4 point_position;
+      varying vec3 normal_vector;
+
+      void main()
+      {
+      point_color = color;
+      point_position = modelViewMatrix * vec4( position, 1.0 );
+      normal_vector = normalMatrix * normal;
+      gl_Position = projectionMatrix * point_position;
+      }
+      </script>
+
+      <script type="x-shader/x-fragment" id="phong4.frag">
+      varying vec3 point_color;
+      varying vec4 point_position;
+      varying vec3 normal_vector;
+      uniform vec3 light_position;
+      uniform vec3 camera_position;
+      uniform vec3 mcolor;
+      vec3 CookTorranceReflection( vec3 C, vec3 L, vec3 N, vec3 V )
+      {
+          float ka = 0.3;
+          float kd = 0.5;
+          float ks = 0.8;
+          float m = 0.2; // roughness. [0:smooth, 1:rough]
+          float F0 = 0.2;
+
+          float dd = dot( N, L );
+          float ds = 0.0;
+          if ( dd > 0.0 )
+          {
+        vec3 H = normalize( L + V );
+        float NL = dd;
+        float NH = dot( N, H );
+        float NV = dot( N, V );
+        float VH = dot( V, H );
+
+        // Beckmann distribution
+        float NH2 = NH * NH;
+        float NH4 = NH2 * NH2;
+        float D = ( 1.0 / ( 4.0 * m * m * NH4 ) ) * exp( ( NH2 - 1.0 ) / ( m * m * NH2 ) );
+
+        // Geometrical attenuation factor
+        float G = min( 1.0, min( 2.0 * NH * NV / VH, 2.0 * NH * NL / VH ) );
+
+        // Fresnel term
+        float n = ( 1.0 + sqrt( F0 ) ) / ( 1.0 - sqrt( F0 ) );
+        float c = VH;
+        float g = sqrt( n * n + c * c - 1.0 );
+        float gc0 = g - c;
+        float gc1 = g + c;
+        float cgc0 = c * gc1 - 1.0;
+        float cgc1 = c * gc0 + 1.0;
+        float f0 = ( gc0 * gc0 ) / ( gc1 * gc1 );
+        float f1 = 1.0 + ( cgc0 / cgc1 ) * ( cgc0 / cgc1 );
+        float F = 0.5 * f0 * f1;
+
+        // Specular component
+        ds = ( F / 3.14159265 ) * ( D * G / ( NL * NV ) );
+          }
+
+          float Ia = ka;
+          float Id = kd * dd;
+          float Is = ks * ds;
+          return C * ( Ia + Id + Is );
+      }
+       void main()
+       {
+       vec3 C = mcolor;
+       vec3 L = normalize( light_position - point_position.xyz );
+       vec3 N = normalize( normal_vector );
+       vec3 V = normalize( camera_position - point_position.xyz);
+       vec3 shaded_color = CookTorranceReflection( C, L, N, V );
+       gl_FragColor = vec4( shaded_color, 1.0 );
+       }
+      </script>
+      <!-- Gouraud shading -->
+      <script type="x-shader/x-vertex" id="gouraud1.vert">
+        varying vec3 point_color;
+        varying vec4 point_position;
+        varying vec3 normal_vector;
+        uniform vec3 light_position;
+        uniform vec3 camera_position;
+        uniform vec3 mcolor;
+        vec3 PhongReflection( vec3 C, vec3 L, vec3 N ,vec3 V)
+        {
+        float ka = 0.3;
+        float kd = 0.5;
+        float ks = 0.8;
+        float n = 50.0;
+        vec3 R = reflect( -L, N );
+        float dd = max( dot( N, L ), 0.0 );
+        float ds = pow( max( dot( R, V ), 0.0 ), n );
+        if ( dd <= 0.0 ) { ds = 0.0; }
+        float Ia = ka;
+        float Id = kd * dd;
+        float Is = ks * ds;
+        return C * ( Ia + Id + Is );
+        }
+        void main()
+        {
+        point_position = modelViewMatrix * vec4( position, 1.0 );
+        normal_vector = normalMatrix * normal;
+        vec3 C = mcolor;
+        vec3 L = normalize( light_position - point_position.xyz );
+        vec3 N = normalize( normal_vector );
+        vec3 V = normalize( camera_position - point_position.xyz);
+        point_color = PhongReflection( C, L, N ,V);
+        gl_Position = projectionMatrix * point_position;
+        }
+        </script>
+        <script type="x-shader/x-fragment" id="gouraud1.frag">
+        varying vec3 point_color;
+        void main()
+        {
+        gl_FragColor = vec4( point_color, 1.0 );
+        }
+        </script>
+        <script type="x-shader/x-vertex" id="gouraud2.vert">
+        varying vec3 point_color;
+        varying vec4 point_position;
+        varying vec3 normal_vector;
+        uniform vec3 light_position;
+        uniform vec3 mcolor;
+        vec3 LambertianReflection( vec3 C, vec3 L, vec3 N )
+        {
+        float ka = 0.4;
+        float kd = 0.6;
+        float dd = max( dot( N, L ), 0.0 );
+        float Ia = ka;
+        float Id = kd * dd;
+        return C * ( Ia + Id );
+        }
+        void main()
+        {
+        point_position = modelViewMatrix * vec4( position, 1.0 );
+        normal_vector = normalMatrix * normal;
+        vec3 C = mcolor;
+        vec3 L = normalize( light_position - point_position.xyz );
+        vec3 N = normalize( normal_vector );
+        point_color = LambertianReflection( C, L, N );
+        gl_Position = projectionMatrix * point_position;
+        }
+        </script>
+        <script type="x-shader/x-fragment" id="gouraud2.frag">
+        varying vec3 point_color;
+        void main()
+        {
+        gl_FragColor = vec4( point_color, 1.0 );
+        }
+        </script>
+        <script type="x-shader/x-vertex" id="gouraud3.vert">
+          varying vec3 point_color;
+          varying vec4 point_position;
+          varying vec3 normal_vector;
+          uniform vec3 light_position;
+          uniform vec3 camera_position;
+          uniform vec3 mcolor;
+          vec3 BlinnPhongReflection( vec3 C, vec3 L, vec3 N, vec3 V )
+          {
+              float ka = 0.3;
+              float kd = 0.5;
+              float ks = 0.8;
+              float n = 50.0;
+
+              vec3 H = normalize( L + V );
+              float dd = dot( N, L );
+              float ds = 0.0;
+              if ( dd > 0.0 )
+              {
+            ds = pow( dot( H, N ), n );
+              }
+
+              float Ia = ka;
+              float Id = kd * dd;
+              float Is = ks * ds;
+              return C * ( Ia + Id + Is );
+          }
+          void main()
+          {
+          point_position = modelViewMatrix * vec4( position, 1.0 );
+          normal_vector = normalMatrix * normal;
+          vec3 C = mcolor;
+          vec3 L = normalize( light_position - point_position.xyz );
+          vec3 N = normalize( normal_vector );
+          vec3 V = normalize( camera_position - point_position.xyz);
+          point_color = BlinnPhongReflection( C, L, N, V );
+          gl_Position = projectionMatrix * point_position;
+          }
+          </script>
+          <script type="x-shader/x-fragment" id="gouraud3.frag">
+          varying vec3 point_color;
+          void main()
+          {
+          gl_FragColor = vec4( point_color, 1.0 );
+          }
+          </script>
+          <script type="x-shader/x-vertex" id="gouraud4.vert">
+            varying vec3 point_color;
+            varying vec4 point_position;
+            varying vec3 normal_vector;
+            uniform vec3 light_position;
+            uniform vec3 camera_position;
+            uniform vec3 mcolor;
+            vec3 CookTorranceReflection( vec3 C, vec3 L, vec3 N, vec3 V )
+            {
+                float ka = 0.3;
+                float kd = 0.5;
+                float ks = 0.8;
+                float m = 0.2; // roughness. [0:smooth, 1:rough]
+                float F0 = 0.2;
+
+                float dd = dot( N, L );
+                float ds = 0.0;
+                if ( dd > 0.0 )
+                {
+              vec3 H = normalize( L + V );
+              float NL = dd;
+              float NH = dot( N, H );
+              float NV = dot( N, V );
+              float VH = dot( V, H );
+
+              // Beckmann distribution
+              float NH2 = NH * NH;
+              float NH4 = NH2 * NH2;
+              float D = ( 1.0 / ( 4.0 * m * m * NH4 ) ) * exp( ( NH2 - 1.0 ) / ( m * m * NH2 ) );
+
+              // Geometrical attenuation factor
+              float G = min( 1.0, min( 2.0 * NH * NV / VH, 2.0 * NH * NL / VH ) );
+
+              // Fresnel term
+              float n = ( 1.0 + sqrt( F0 ) ) / ( 1.0 - sqrt( F0 ) );
+              float c = VH;
+              float g = sqrt( n * n + c * c - 1.0 );
+              float gc0 = g - c;
+              float gc1 = g + c;
+              float cgc0 = c * gc1 - 1.0;
+              float cgc1 = c * gc0 + 1.0;
+              float f0 = ( gc0 * gc0 ) / ( gc1 * gc1 );
+              float f1 = 1.0 + ( cgc0 / cgc1 ) * ( cgc0 / cgc1 );
+              float F = 0.5 * f0 * f1;
+
+              // Specular component
+              ds = ( F / 3.14159265 ) * ( D * G / ( NL * NV ) );
+                }
+
+                float Ia = ka;
+                float Id = kd * dd;
+                float Is = ks * ds;
+                return C * ( Ia + Id + Is );
+            }
+            void main()
+            {
+            point_position = modelViewMatrix * vec4( position, 1.0 );
+            normal_vector = normalMatrix * normal;
+            vec3 C = mcolor;
+            vec3 L = normalize( light_position - point_position.xyz );
+            vec3 N = normalize( normal_vector );
+            vec3 V = normalize( camera_position - point_position.xyz);
+            point_color = CookTorranceReflection( C, L, N, V );
+            gl_Position = projectionMatrix * point_position;
+            }
+            </script>
+            <script type="x-shader/x-fragment" id="gouraud4.frag">
+            varying vec3 point_color;
+            void main()
+            {
+            gl_FragColor = vec4( point_color, 1.0 );
+            }
+            </script>
+      <script>
+       main();
+      </script>
+    </body>
+</html>
